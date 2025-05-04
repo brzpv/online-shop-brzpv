@@ -4,16 +4,16 @@ services:
     ports:
       - 80:80
     volumes:
-      - /home/brzpv/PhpstormProjects/untitled/docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - /home/brzpdcv/PhpstormProjects/untitled:/var/www/html
+      - /home/brzpv/PhpstormProjects/online-shop-brzpv/docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - /home/brzpdcv/PhpstormProjects/online-shop-brzpv:/var/www/html
 
   php-fpm:
     container_name: php-fpm
-    build: /home/brzpv/PhpstormProjects/untitled/docker/php
+    build: /home/brzpv/PhpstormProjects/online-shop-brzpv/docker/php
     volumes:
-      - /home/brzpv/PhpstormProjects/untitled:/var/www/html
+      - /home/brzpv/PhpstormProjects/online-shop-brzpv:/var/www/html
 
-  postgres:
+  db:
     image: postgres:13.1
     container_name: postgres_db
     environment:

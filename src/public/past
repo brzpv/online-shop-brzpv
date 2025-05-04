@@ -1,0 +1,83 @@
+$errors = [];
+
+if (isset($_POST['name'])) {
+    $name = $_POST['name'];
+    if (strlen($name) < 2) {
+        $errors['name'] = "В имени должно быть не меньше 2 символов!";
+    }
+} else {
+    $errors['name'] = "Имя должно быть заполнено!";
+}
+
+if (isset($_POST['email'])) {
+    $email = $_POST['email'];
+    if (strlen($email) < 2) {
+        $errors['email'] = "В Email должно быть не меньше 2 символов!";
+    } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+        $errors['email'] = "Email некорректен!";
+    }
+} else {
+    $errors['email'] = "Email должен быть заполнен!";
+}
+
+if (isset($_POST['psw'])) {
+    $password = $_POST['psw'];
+} else {
+    $errors['psw'] = "Пароль должен быть заполнен!";
+}
+
+if (isset($_POST['psw-repeat'])) {
+    $passwordRep = $_POST['psw-repeat'];
+    if ($password !== $passwordRep) {
+        $errors['psw'] = "Пароли не совпадают!";
+    }
+} else {
+    $errors['psw'] = "Пароль должен быть заполнен!";
+}
+
+if (empty($errors)) {
+    $pdo = new PDO(dsn: 'pgsql:host=db;port=5432;dbname=mydb', username: 'user', password: 'pwd');
+
+    $password = password_hash($password, PASSWORD_DEFAULT);
+
+    $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
+    $stmt->execute(['name' => $name, 'email' => $email, 'password' => $password]);
+
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
+    $stmt->execute(['email' => $email]);
+    $data = $stmt->fetch();
+
+    print_r($data);
+}
+
+require_once './registration_form.php';
+
+__________
+
+
+<?php
+
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+$pdo = new PDO(dsn: 'pgsql:host=db;port=5432;dbname=mydb', username: 'user', password: 'pwd');
+$stmt = $pdo->prepare(query: "SELECT * FROM users WHERE email = :email");
+$stmt->execute(['email' => $username]);
+
+$user = $stmt->fetch();
+
+$errors = [];
+if ($user === false) {
+    $errors['username'] = "Логин или пароль неверный!'";
+} else {
+    $passwordDb = $user['password'];
+
+    if (password_verify($password, $passwordDb)) {
+        setcookie('user_id', $user['id']);
+        header("Location: /catalog.php");
+    } else {
+        $errors['username'] = 'Логин или пароль неверный!';
+    }
+}
+
+require_once './login_form.php';
